@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -113,9 +114,10 @@ public class Test extends HttpServlet {
 			}
 		}
 		LogUtil.print("}---------doGet-------------");
-
+		data = URLDecoder.decode(data, "utf-8");
 		byte g[] = data.getBytes();
 		// response.setHeader("Content-Encoding", "gzip");
+//		response.setContentType("text/html;charset=UTF-8");
 		response.setHeader("Content-Length", g.length + "");
 		response.getOutputStream().write(g);
 	}
@@ -171,7 +173,7 @@ public class Test extends HttpServlet {
 	}
 
 	private String createSQLForAddonarticle(String aid, String typeid) {
-		String sql = "SELECT body,flash,shipin  FROM lol_addonarticle Where aid="
+		String sql = "SELECT body,flash,shipin,tx  FROM lol_addonarticle Where aid="
 				+ aid + " AND " + "typeid=" + typeid;
 		return sql;
 	}
