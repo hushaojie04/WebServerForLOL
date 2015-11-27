@@ -44,7 +44,7 @@ public class Test extends HttpServlet {
 		// mJDBCHandler.update(queryChildrenAreaInfo());
 
 		String data = mJDBCHandler.query("SELECT *  FROM lol_arcatt");
-
+		LogUtil.print(data);
 		JSONArray jsonArray = JSONArray.fromObject(data);
 		for (int i = 0; i < jsonArray.size(); i++) {
 			JSONObject object = jsonArray.getJSONObject(i);
@@ -114,7 +114,7 @@ public class Test extends HttpServlet {
 			}
 		}
 		LogUtil.print("}---------doGet-------------");
-		data = URLDecoder.decode(data, "utf-8");
+//		data = URLDecoder.decode(data, "utf-8");
 		byte g[] = data.getBytes();
 		// response.setHeader("Content-Encoding", "gzip");
 //		response.setContentType("text/html;charset=UTF-8");

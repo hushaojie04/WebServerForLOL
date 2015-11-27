@@ -7,6 +7,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import javax.sql.DataSource;
+
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
@@ -16,16 +18,15 @@ import com.sj.utils.LogUtil;
 public class JDBCHandler {
 	// JDBC driver name and database URL
 	static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-	 static final String DB_URL = "#####################";
-	 static final String USER = "#############";
-	 static final String PASS = "##############";
-
-	Connection conn = null;
+	static final String DB_URL = "jdbc:mysql://localhost/dedecmsv57gbk";
+	static final String USER = "root";
+	static final String PASS = "123qwe";
 
 	public JDBCHandler() {
 		// STEP 2: Register JDBC driver
-		connectJDBC();
 	}
+
+	Connection conn;
 
 	private void connectJDBC() {
 		try {
@@ -49,36 +50,14 @@ public class JDBCHandler {
 		}
 	}
 
-	private void closeAll(Statement stt, ResultSet set) {
-//		try {
-//			if (conn != null)
-//				conn.close();
-//		} catch (SQLException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		try {
-//			if (stt != null)
-//				stt.close();
-//		} catch (SQLException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		try {
-//			if (set != null)
-//				set.close();
-//		} catch (SQLException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-	}
-
 	public String query(String sql) {
 		LogUtil.print("query:" + sql);
 		Statement stmt = null;
 		String result = "";
 		ResultSet rs = null;
+//		connectJDBC();
 		try {
+			conn = JdbcUtil.getConnection();
 			LogUtil.print("Creating statement...");
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery(sql);
@@ -99,10 +78,9 @@ public class JDBCHandler {
 				LogUtil.print("conn.isClosed() error");
 			}
 
-//			connectJDBC();
-			return query(sql);
+			// connectJDBC();
 		} finally {
-			closeAll(stmt, rs);
+			JdbcUtil.release(conn, stmt, rs);
 		}
 		return result;
 	}
@@ -110,8 +88,10 @@ public class JDBCHandler {
 	public void update(String sql) {
 		LogUtil.print("update:" + sql);
 		Statement stmt = null;
+//		connectJDBC();
 		try {
 			LogUtil.print("Creating statement...");
+			conn = JdbcUtil.getConnection();
 			stmt = conn.createStatement();
 			stmt.executeUpdate(sql);
 			// STEP 6: Clean-up environment
@@ -122,16 +102,16 @@ public class JDBCHandler {
 			LogUtil.print("getSQLState:" + e.getSQLState());
 			LogUtil.print("getMessage:" + e.getMessage());
 
-			connectJDBC();
-			try {
-				if (stmt != null)
-					stmt.executeUpdate(sql);
-			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+//			connectJDBC();
+//			try {
+//				if (stmt != null)
+//					stmt.executeUpdate(sql);
+//			} catch (SQLException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			}
 		} finally {
-			closeAll(stmt, null);
+			JdbcUtil.release(conn, stmt, null);
 		}
 	}
 
