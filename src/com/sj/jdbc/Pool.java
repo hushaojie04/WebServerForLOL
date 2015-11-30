@@ -12,9 +12,9 @@ import com.sj.utils.LogUtil;
 
 public class Pool {
 	static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-	static final String DB_URL = "jdbc:mysql://103.38.43.218/qushiw?autoReconnect=true&failOverReadOnly=false&maxReconnects=10&characterEncoding=UTF8";
-	static final String USER = "shaojie";
-	static final String PASS = "shaojie";
+	static final String DB_URL = "jdbc:mysql://localhost/dedecmsv57gbk";
+	 static final String USER = "root";
+	 static final String PASS = "123qwe";
 
 	private static LinkedList<ConnectionWrapper> m_notUsedConnection = new LinkedList<ConnectionWrapper>();
 	private static HashSet<ConnectionWrapper> m_usedUsedConnection = new HashSet<ConnectionWrapper>();
