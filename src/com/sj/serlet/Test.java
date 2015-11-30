@@ -43,7 +43,7 @@ public class Test extends HttpServlet {
 		mJDBCHandler = new JDBCHandler();
 		// mJDBCHandler.update(queryChildrenAreaInfo());
 
-		String data = mJDBCHandler.query("SELECT *  FROM lol_arcatt");
+		String data = mJDBCHandler.query("SELECT *  FROM lol_arcatt",false);
 		LogUtil.print(data);
 		JSONArray jsonArray = JSONArray.fromObject(data);
 		for (int i = 0; i < jsonArray.size(); i++) {
@@ -76,18 +76,18 @@ public class Test extends HttpServlet {
 		if (request.getPathInfo().contains("/read")) {
 			if (request.getQueryString().contains("table")) {
 				sql = "SELECT * FROM " + request.getParameter("table");
-				data = mJDBCHandler.query(sql);
+				data = mJDBCHandler.query(sql,false);
 			} else if (request.getQueryString().contains("arttype")) {
 				sql = createSQLForArcType(request.getParameter("arttype"),
 						request.getParameter("start"),
 						request.getParameter("end"));
-				data = handleData(mJDBCHandler.query(sql),
+				data = handleData(mJDBCHandler.query(sql,hasCondition),
 						request.getParameter("arttype"));
 			} else if (request.getQueryString().contains("aid")
 					&& request.getQueryString().contains("typeid")) {
 				sql = createSQLForAddonarticle(request.getParameter("aid"),
 						request.getParameter("typeid"));
-				data = mJDBCHandler.query(sql);
+				data = mJDBCHandler.query(sql,false);
 			}
 		} else if (request.getPathInfo().contains("/refresh")) {
 			LogUtil.print("---refresh---");
@@ -114,10 +114,10 @@ public class Test extends HttpServlet {
 			}
 		}
 		LogUtil.print("}---------doGet-------------");
-//		data = URLDecoder.decode(data, "utf-8");
+		// data = URLDecoder.decode(data, "utf-8");
 		byte g[] = data.getBytes();
 		// response.setHeader("Content-Encoding", "gzip");
-//		response.setContentType("text/html;charset=UTF-8");
+		response.setContentType("text/html;charset=UTF-8");
 		response.setHeader("Content-Length", g.length + "");
 		response.getOutputStream().write(g);
 	}
@@ -128,7 +128,7 @@ public class Test extends HttpServlet {
 
 		String sql = createSQLForArcType(arttype, "" + checkpos, ""
 				+ (checkpos + 5));
-		String data = handleData(mJDBCHandler.query(sql), arttype);
+		String data = handleData(mJDBCHandler.query(sql, hasCondition), arttype);
 		LogUtil.print("---data---" + data);
 
 		JSONArray array = JSONArray.fromObject(data);
@@ -178,6 +178,8 @@ public class Test extends HttpServlet {
 		return sql;
 	}
 
+	boolean hasCondition;
+
 	private String createSQLForArcType(String reid, String param1, String param2) {
 		String sql = "";
 		// sql =
@@ -185,10 +187,12 @@ public class Test extends HttpServlet {
 		// if (false) {
 		switch (reid) {
 		case "0":
+			hasCondition = false;
 			sql = "SELECT ID,typename  FROM lol_arctype Where reID = 0";
 			break;
 
 		default:
+			hasCondition = true;
 			String condition = "SET @cond = queryChildrenAreaInfo(" + reid
 					+ ")";
 			mJDBCHandler.update(condition);

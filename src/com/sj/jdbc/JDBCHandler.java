@@ -18,9 +18,6 @@ import com.sj.utils.LogUtil;
 public class JDBCHandler {
 	// JDBC driver name and database URL
 	static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-	static final String DB_URL = "jdbc:mysql://localhost/dedecmsv57gbk";
-	static final String USER = "root";
-	static final String PASS = "123qwe";
 
 	public JDBCHandler() {
 		// STEP 2: Register JDBC driver
@@ -28,91 +25,69 @@ public class JDBCHandler {
 
 	Connection conn;
 
-	private void connectJDBC() {
-		try {
-			Class.forName("com.mysql.jdbc.Driver");
-			// STEP 3: Open a connection
-			LogUtil.print("Connecting to database...");
-			conn = DriverManager.getConnection(DB_URL, USER, PASS);
-			// STEP 4: Execute a query
+	//
+	// private void connectJDBC() {
+	// try {
+	// Class.forName("com.mysql.jdbc.Driver");
+	// // STEP 3: Open a connection
+	// LogUtil.print("Connecting to database...");
+	// conn = DriverManager.getConnection(DB_URL, USER, PASS);
+	// // STEP 4: Execute a query
+	//
+	// } catch (ClassNotFoundException e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// LogUtil.print("ClassNotFoundException " + e.getLocalizedMessage());
+	//
+	// } catch (SQLException e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// LogUtil.print("SQLException " + e.getErrorCode());
+	//
+	// } finally {
+	// }
+	// }
 
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			LogUtil.print("ClassNotFoundException " + e.getLocalizedMessage());
-
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			LogUtil.print("SQLException " + e.getErrorCode());
-
-		} finally {
-		}
-	}
-
-	public String query(String sql) {
-		LogUtil.print("query:" + sql);
+	public String query(String sql, boolean hasCondition) {
+		LogUtil.print("query--------------------start");
 		Statement stmt = null;
 		String result = "";
 		ResultSet rs = null;
-//		connectJDBC();
+		// connectJDBC();
 		try {
 			conn = JdbcUtil.getConnection();
-			LogUtil.print("Creating statement...");
+			LogUtil.print("query----getConnection=" + conn.hashCode());
 			stmt = conn.createStatement();
+			if (hasCondition && update_info != null) {
+				stmt.executeUpdate(update_info);
+			}
 			rs = stmt.executeQuery(sql);
 			result = resultSetToJson(rs);
-			// STEP 6: Clean-up environment
-			rs.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			LogUtil.print("getErrorCode:" + e.getErrorCode());
-			LogUtil.print("getSQLState:" + e.getSQLState());
-			LogUtil.print("getMessage:" + e.getMessage());
-			try {
-				LogUtil.print("conn.isClosed():" + conn.isClosed());
-			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-				LogUtil.print("conn.isClosed() error");
-			}
+			showError(e);
 
-			// connectJDBC();
 		} finally {
+			LogUtil.print("query----release=" + conn.hashCode());
 			JdbcUtil.release(conn, stmt, rs);
+			update_info = null;
 		}
+		LogUtil.print("query--------------------end");
 		return result;
 	}
 
+	private void showError(Exception e) {
+		LogUtil.print("getErrorCode:" + ((SQLException) e).getErrorCode()
+				+ "\n getSQLState:" + ((SQLException) e).getSQLState()
+				+ "\n getMessage:" + e.getMessage());
+	}
+
+	String update_info;
+
 	public void update(String sql) {
 		LogUtil.print("update:" + sql);
-		Statement stmt = null;
-//		connectJDBC();
-		try {
-			LogUtil.print("Creating statement...");
-			conn = JdbcUtil.getConnection();
-			stmt = conn.createStatement();
-			stmt.executeUpdate(sql);
-			// STEP 6: Clean-up environment
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			LogUtil.print("getErrorCode:" + e.getErrorCode());
-			LogUtil.print("getSQLState:" + e.getSQLState());
-			LogUtil.print("getMessage:" + e.getMessage());
-
-//			connectJDBC();
-//			try {
-//				if (stmt != null)
-//					stmt.executeUpdate(sql);
-//			} catch (SQLException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			}
-		} finally {
-			JdbcUtil.release(conn, stmt, null);
-		}
+		update_info = sql;
 	}
 
 	public String resultSetToJson(ResultSet rs) {

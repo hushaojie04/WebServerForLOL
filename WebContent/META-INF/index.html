@@ -1,0 +1,33 @@
+http://localhost:8080/JavaWebApp/action/read?table=lol_archives
+第一分类
+http://localhost:8080/JavaWebApp/action/read?arttype=0
+哪一个分类的所有信息
+http://localhost:8080/JavaWebApp/action/read?arttype=1
+从什么位置开始
+http://localhost:8080/JavaWebApp/action/read?arttype=1&start=0&end=5
+//具体某遍文章
+http://localhost:8080/JavaWebApp/action/read?aid=1&typeid=7
+//查找这个位置上面是否有新数据
+http://localhost:8080/JavaWebApp/action/refresh?arttype=6&aid=27622&typeid=6
+//图片的路径
+http://localhost/uploads/allimg/151103/1-151103142357-lp.jpg
+
+DROP FUNCTION IF EXISTS queryChildrenAreaInfo;
+CREATE FUNCTION queryChildrenAreaInfo(areaId INT)
+RETURNS VARCHAR(4000)
+BEGIN
+DECLARE sTemp VARCHAR(4000);
+DECLARE sTempChd VARCHAR(4000);
+
+SET sTemp = '';
+SET sTempChd = cast(areaId as char);
+
+WHILE sTempChd is not NULL DO
+SET sTemp = CONCAT(sTemp,',',sTempChd);
+SELECT group_concat(id) INTO sTempChd FROM dede_arctype where FIND_IN_SET(reid,sTempChd)>0;
+END WHILE;
+return sTemp;
+END
+
+
+

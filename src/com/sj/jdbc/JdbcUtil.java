@@ -5,18 +5,24 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import com.sj.utils.LogUtil;
+
 public class JdbcUtil {
 
 	/**
 	 * @Field: pool 数据库连接池
 	 */
-	private static JdbcPool pool = new JdbcPool();
+	private static Pool pool = new Pool();
 
 	public static Connection getConnection() throws SQLException {
+		Connection connection = pool.getConnection();
+		LogUtil.print("connection hashcode=" + connection.hashCode());
 		return pool.getConnection();
 	}
 
 	public static void release(Connection conn, Statement st, ResultSet rs) {
+		LogUtil.print("release=" + conn.hashCode());
+
 		if (rs != null) {
 			try {
 				// 关闭存储查询结果的ResultSet对象
