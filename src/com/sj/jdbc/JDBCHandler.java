@@ -20,43 +20,16 @@ public class JDBCHandler {
 	static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
 
 	public JDBCHandler() {
-		// STEP 2: Register JDBC driver
 	}
 
-	Connection conn;
-
-	//
-	// private void connectJDBC() {
-	// try {
-	// Class.forName("com.mysql.jdbc.Driver");
-	// // STEP 3: Open a connection
-	// LogUtil.print("Connecting to database...");
-	// conn = DriverManager.getConnection(DB_URL, USER, PASS);
-	// // STEP 4: Execute a query
-	//
-	// } catch (ClassNotFoundException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// LogUtil.print("ClassNotFoundException " + e.getLocalizedMessage());
-	//
-	// } catch (SQLException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// LogUtil.print("SQLException " + e.getErrorCode());
-	//
-	// } finally {
-	// }
-	// }
-
 	public String query(String sql, boolean hasCondition) {
-		LogUtil.print("query--------------------start");
 		Statement stmt = null;
 		String result = "";
 		ResultSet rs = null;
 		// connectJDBC();
+		Connection conn = null;
 		try {
 			conn = JdbcUtil.getConnection();
-			LogUtil.print("query----getConnection=" + conn.hashCode());
 			stmt = conn.createStatement();
 			if (hasCondition && update_info != null) {
 				stmt.executeUpdate(update_info);
@@ -69,11 +42,9 @@ public class JDBCHandler {
 			showError(e);
 
 		} finally {
-			LogUtil.print("query----release=" + conn.hashCode());
 			JdbcUtil.release(conn, stmt, rs);
 			update_info = null;
 		}
-		LogUtil.print("query--------------------end");
 		return result;
 	}
 

@@ -43,7 +43,7 @@ public class Test extends HttpServlet {
 		mJDBCHandler = new JDBCHandler();
 		// mJDBCHandler.update(queryChildrenAreaInfo());
 
-		String data = mJDBCHandler.query("SELECT *  FROM lol_arcatt",false);
+		String data = mJDBCHandler.query("SELECT *  FROM lol_arcatt", false);
 		LogUtil.print(data);
 		JSONArray jsonArray = JSONArray.fromObject(data);
 		for (int i = 0; i < jsonArray.size(); i++) {
@@ -51,6 +51,8 @@ public class Test extends HttpServlet {
 			attrMap.put(object.getString("att"), object.getString("attname"));
 		}
 	}
+
+	int count = 0;
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
@@ -67,27 +69,26 @@ public class Test extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		String data = "null";
-		LogUtil.print("---------doGet-------------{");
+		LogUtil.print(count++ + "---------doGet-------------{");
 		LogUtil.print("request.getPathInfo()=" + request.getPathInfo());
 		LogUtil.print("request.getQueryString()=" + request.getQueryString());
-
 		Map<String, String[]> map = request.getParameterMap();
 		String sql = "";
 		if (request.getPathInfo().contains("/read")) {
 			if (request.getQueryString().contains("table")) {
 				sql = "SELECT * FROM " + request.getParameter("table");
-				data = mJDBCHandler.query(sql,false);
+				data = mJDBCHandler.query(sql, false);
 			} else if (request.getQueryString().contains("arttype")) {
 				sql = createSQLForArcType(request.getParameter("arttype"),
 						request.getParameter("start"),
 						request.getParameter("end"));
-				data = handleData(mJDBCHandler.query(sql,hasCondition),
+				data = handleData(mJDBCHandler.query(sql, hasCondition),
 						request.getParameter("arttype"));
 			} else if (request.getQueryString().contains("aid")
 					&& request.getQueryString().contains("typeid")) {
 				sql = createSQLForAddonarticle(request.getParameter("aid"),
 						request.getParameter("typeid"));
-				data = mJDBCHandler.query(sql,false);
+				data = mJDBCHandler.query(sql, false);
 			}
 		} else if (request.getPathInfo().contains("/refresh")) {
 			LogUtil.print("---refresh---");
@@ -129,7 +130,6 @@ public class Test extends HttpServlet {
 		String sql = createSQLForArcType(arttype, "" + checkpos, ""
 				+ (checkpos + 5));
 		String data = handleData(mJDBCHandler.query(sql, hasCondition), arttype);
-		LogUtil.print("---data---" + data);
 
 		JSONArray array = JSONArray.fromObject(data);
 		// aid=1&typeid=7

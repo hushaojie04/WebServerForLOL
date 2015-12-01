@@ -16,8 +16,7 @@ public class JdbcUtil {
 
 	public static Connection getConnection() throws SQLException {
 		Connection connection = pool.getConnection();
-		LogUtil.print("connection hashcode=" + connection.hashCode());
-		return pool.getConnection();
+		return connection;
 	}
 
 	public static void release(Connection conn, Statement st, ResultSet rs) {

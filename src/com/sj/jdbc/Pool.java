@@ -12,10 +12,9 @@ import com.sj.utils.LogUtil;
 
 public class Pool {
 	static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-	static final String DB_URL = "jdbc:mysql://localhost/dedecmsv57gbk";
+	 static final String DB_URL = "jdbc:mysql://localhost/dedecmsv57gbk";
 	 static final String USER = "root";
 	 static final String PASS = "123qwe";
-
 	private static LinkedList<ConnectionWrapper> m_notUsedConnection = new LinkedList<ConnectionWrapper>();
 	private static HashSet<ConnectionWrapper> m_usedUsedConnection = new HashSet<ConnectionWrapper>();
 	static private long m_lastClearClosedConnection = System
@@ -32,26 +31,6 @@ public class Pool {
 			installDriver(driver);
 		} catch (Exception e) {
 		}
-
-		new Thread() {
-			public void run() {
-				LogUtil.print("---------Thread----------------------{{{");
-				try {
-					Thread.sleep(10000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				LogUtil.print("---------run----------------------{{{");
-				clearClosedConnection();
-				LogUtil.print("m_notUsedConnection:"
-						+ m_notUsedConnection.size());
-				LogUtil.print("m_usedUsedConnection:"
-						+ m_usedUsedConnection.size());
-				LogUtil.print("---------run----------------------}}}");
-
-			};
-		}.start();
 	}
 
 	public static void installDriver(Driver driver) {
@@ -64,7 +43,8 @@ public class Pool {
 
 	public static synchronized void pushBackToPool(ConnectionWrapper Connection) {
 		boolean exist = m_usedUsedConnection.remove(Connection);
-		LogUtil.print("pushBackToPool " + exist + " " + Connection.Connection.hashCode());
+		LogUtil.print("pushBackToPool " + exist + " "
+				+ Connection.Connection.hashCode());
 
 		if (exist) {
 			m_notUsedConnection.addLast(Connection);
@@ -74,9 +54,6 @@ public class Pool {
 	}
 
 	public static synchronized Connection getConnection() {
-		LogUtil.print("----getConnectionCount:" + getConnectionCount());
-		LogUtil.print("m_notUsedConnection:连接池可用对象"
-				+ m_notUsedConnection.size() + "个");
 		clearClosedConnection();
 		LogUtil.print("m_notUsedConnection:连接池可用对象"
 				+ m_notUsedConnection.size() + "个");
@@ -86,7 +63,6 @@ public class Pool {
 				ConnectionWrapper wrapper = (ConnectionWrapper) m_notUsedConnection
 						.removeFirst();
 				if (wrapper.Connection.isClosed()) {
-					LogUtil.print("############wrapper##isClosed");
 					continue;
 				}
 				m_usedUsedConnection.add(wrapper);
@@ -112,7 +88,6 @@ public class Pool {
 			}
 		}
 		if (list.size() == 0) {
-			LogUtil.print("list.size() == 0");
 			return null;
 		}
 		wrapper = (ConnectionWrapper) list.removeFirst();
@@ -127,7 +102,6 @@ public class Pool {
 	}
 
 	private static ConnectionWrapper getNewConnection() {
-		LogUtil.print("-----New Connection----");
 		try {
 			Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
 			return new ConnectionWrapper(conn);
