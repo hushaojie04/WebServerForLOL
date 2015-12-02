@@ -118,7 +118,7 @@ public class Test extends HttpServlet {
 		// data = URLDecoder.decode(data, "utf-8");
 		byte g[] = data.getBytes();
 		// response.setHeader("Content-Encoding", "gzip");
-		response.setContentType("text/html;charset=UTF-8");
+//		response.setContentType("text/html;charset=UTF-8");
 		response.setHeader("Content-Length", g.length + "");
 		response.getOutputStream().write(g);
 	}

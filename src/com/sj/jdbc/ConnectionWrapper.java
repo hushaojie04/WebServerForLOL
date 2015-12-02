@@ -12,7 +12,6 @@ public class ConnectionWrapper implements InvocationHandler {
 	public long lastAccessTime = System.currentTimeMillis();
 
 	public ConnectionWrapper(Connection conn) {
-
 		Class[] interfaces = conn.getClass().getInterfaces();
 		if (interfaces == null || interfaces.length <= 0) {
 			interfaces = new Class[1];
@@ -45,4 +44,5 @@ public class ConnectionWrapper implements InvocationHandler {
 			e.printStackTrace();
 		}
 	}
+
 }

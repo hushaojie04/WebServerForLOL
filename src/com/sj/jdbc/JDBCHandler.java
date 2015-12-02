@@ -13,6 +13,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
+import com.sj.jdbc.Pool.OnCheckAction;
 import com.sj.utils.LogUtil;
 
 public class JDBCHandler {
@@ -20,9 +21,43 @@ public class JDBCHandler {
 	static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
 
 	public JDBCHandler() {
+		Pool.setOnCheckAction(new OnCheckAction() {
+
+			@Override
+			public boolean checkAvailable(Connection conn) {
+				// TODO Auto-generated method stub
+				Statement stmt = null;
+				String result = "";
+				ResultSet rs = null;
+				try {
+					stmt = conn.createStatement();
+					rs = stmt.executeQuery("SELECT *  FROM lol_arcatt");
+					result = resultSetToJson(rs);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					showError(conn, e);
+					return false;
+				} finally {
+					try {
+						stmt.close();
+						rs.close();
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				return true;
+			}
+
+		});
 	}
 
 	public String query(String sql, boolean hasCondition) {
+		return query(sql, hasCondition, true);
+	}
+
+	public String query(String sql, boolean hasCondition, boolean isrelease) {
 		Statement stmt = null;
 		String result = "";
 		ResultSet rs = null;
@@ -39,8 +74,11 @@ public class JDBCHandler {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			showError(e);
-
+			showError(conn, e);
+			if (e.getSQLState().contains("08S01")
+					&& e.getMessage().contains("Communications link failure")) {
+				return null;
+			}
 		} finally {
 			JdbcUtil.release(conn, stmt, rs);
 			update_info = null;
@@ -48,10 +86,12 @@ public class JDBCHandler {
 		return result;
 	}
 
-	private void showError(Exception e) {
-		LogUtil.print("getErrorCode:" + ((SQLException) e).getErrorCode()
+	private void showError(Connection conn, Exception e) {
+		String log = "getErrorCode:" + ((SQLException) e).getErrorCode()
 				+ "\n getSQLState:" + ((SQLException) e).getSQLState()
-				+ "\n getMessage:" + e.getMessage());
+				+ "\n getMessage:" + e.getMessage();
+		LogUtil.print(log);
+
 	}
 
 	String update_info;

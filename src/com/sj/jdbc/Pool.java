@@ -15,11 +15,13 @@ public class Pool {
 	 static final String DB_URL = "jdbc:mysql://localhost/dedecmsv57gbk";
 	 static final String USER = "root";
 	 static final String PASS = "123qwe";
+
 	private static LinkedList<ConnectionWrapper> m_notUsedConnection = new LinkedList<ConnectionWrapper>();
 	private static HashSet<ConnectionWrapper> m_usedUsedConnection = new HashSet<ConnectionWrapper>();
 	static private long m_lastClearClosedConnection = System
 			.currentTimeMillis();
-	public static long CHECK_CLOSED_CONNECTION_TIME = 4000; // 4
+	public static long CHECK_CLOSED_CONNECTION_TIME = 10000; // 4
+	static OnCheckAction mOnCheckAction;
 	static {
 		initDriver();
 	}
@@ -48,21 +50,30 @@ public class Pool {
 
 		if (exist) {
 			m_notUsedConnection.addLast(Connection);
-			LogUtil.print("pushBackToPool连接池回收对象 ," + "共"
-					+ m_notUsedConnection.size() + "对象");
+			LogUtil.print("pushBackToPool m_notUsedConnection.size:"
+					+ m_notUsedConnection.size());
 		}
+	}
+
+	public static void setOnCheckAction(OnCheckAction action) {
+		mOnCheckAction = action;
 	}
 
 	public static synchronized Connection getConnection() {
 		clearClosedConnection();
-		LogUtil.print("m_notUsedConnection:连接池可用对象"
-				+ m_notUsedConnection.size() + "个");
+		LogUtil.print("getConnection m_notUsedConnection.size:"
+				+ m_notUsedConnection.size());
 
 		while (m_notUsedConnection.size() > 0) {
 			try {
 				ConnectionWrapper wrapper = (ConnectionWrapper) m_notUsedConnection
 						.removeFirst();
 				if (wrapper.Connection.isClosed()) {
+					continue;
+				}
+				if (mOnCheckAction != null
+						&& !mOnCheckAction.checkAvailable(wrapper.Connection)) {
+					LogUtil.print("#######Communications link failure#######");
 					continue;
 				}
 				m_usedUsedConnection.add(wrapper);
@@ -92,9 +103,6 @@ public class Pool {
 		}
 		wrapper = (ConnectionWrapper) list.removeFirst();
 		m_usedUsedConnection.add(wrapper);
-		LogUtil.print("获取连接池回收对象," + "正在使用的对象有" + m_usedUsedConnection.size()
-				+ "个");
-		LogUtil.print("增加未使用对象 " + list.size() + "个");
 		m_notUsedConnection.addAll(list);
 		list.clear();
 
@@ -219,4 +227,7 @@ public class Pool {
 		return m_notUsedConnection.size() + m_usedUsedConnection.size();
 	}
 
+	public interface OnCheckAction {
+		boolean checkAvailable(Connection conn);
+	}
 }
