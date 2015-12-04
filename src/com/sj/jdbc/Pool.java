@@ -15,7 +15,6 @@ public class Pool {
 	 static final String DB_URL = "jdbc:mysql://localhost/dedecmsv57gbk";
 	 static final String USER = "root";
 	 static final String PASS = "123qwe";
-
 	private static LinkedList<ConnectionWrapper> m_notUsedConnection = new LinkedList<ConnectionWrapper>();
 	private static HashSet<ConnectionWrapper> m_usedUsedConnection = new HashSet<ConnectionWrapper>();
 	static private long m_lastClearClosedConnection = System
@@ -65,28 +64,31 @@ public class Pool {
 				+ m_notUsedConnection.size());
 
 		while (m_notUsedConnection.size() > 0) {
+			ConnectionWrapper wrapper = (ConnectionWrapper) m_notUsedConnection
+					.removeFirst();
 			try {
-				ConnectionWrapper wrapper = (ConnectionWrapper) m_notUsedConnection
-						.removeFirst();
 				if (wrapper.Connection.isClosed()) {
 					continue;
 				}
-				if (mOnCheckAction != null
-						&& !mOnCheckAction.checkAvailable(wrapper.Connection)) {
-					LogUtil.print("#######Communications link failure#######");
-					continue;
-				}
-				m_usedUsedConnection.add(wrapper);
-				LogUtil.print("m_usedUsedConnection:" + "正在使用的对象有"
-						+ m_usedUsedConnection.size() + "个");
-				// if (DEBUG) {
-				// wrapper.debugInfo = new Throwable(
-				// "Connection initial statement");
-				// }
-				return wrapper.Connection;
-			} catch (Exception e) {
-				LogUtil.print("##############" + e.getCause());
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+			if (mOnCheckAction != null
+					&& !mOnCheckAction.checkAvailable(wrapper.Connection)) {
+				LogUtil.print("close the error Connection");
+				wrapper.close();
+				continue;
+			}
+			m_usedUsedConnection.add(wrapper);
+			LogUtil.print("m_usedUsedConnection:size=" + ""
+					+ m_usedUsedConnection.size() + "");
+			// if (DEBUG) {
+			// wrapper.debugInfo = new Throwable(
+			// "Connection initial statement");
+			// }
+			return wrapper.Connection;
+
 		}
 		int newCount = getIncreasingConnectionCount();
 		LinkedList list = new LinkedList();

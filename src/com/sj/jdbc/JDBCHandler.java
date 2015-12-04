@@ -29,25 +29,21 @@ public class JDBCHandler {
 				Statement stmt = null;
 				String result = "";
 				ResultSet rs = null;
+				boolean available = true;
 				try {
 					stmt = conn.createStatement();
 					rs = stmt.executeQuery("SELECT *  FROM lol_arcatt");
 					result = resultSetToJson(rs);
+
+					stmt.close();
+					rs.close();
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 					showError(conn, e);
-					return false;
-				} finally {
-					try {
-						stmt.close();
-						rs.close();
-					} catch (SQLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					available = false;
 				}
-				return true;
+				return available;
 			}
 
 		});
